@@ -1,5 +1,6 @@
 package com.example.fuzzycommitment.dto.response;
 
+
 public class PostDto {
     private String id;
     private String ownerId;
