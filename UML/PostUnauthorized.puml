@@ -1,0 +1,17 @@
+@startuml
+'https://plantuml.com/sequence-diagram
+
+autonumber
+
+Client -> Frontend: Create post
+
+Client <-- Frontend: show create post form
+Client -> Frontend: fill create post form
+
+Frontend -> Backend: POST: /post
+Frontend <-- Backend: return postId + 201
+Frontend -> Backend: GET: /post/{id}
+Frontend <-- Backend: return post + 200
+Client <-- Frontend: show created post page
+
+@enduml

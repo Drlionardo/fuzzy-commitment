@@ -1,0 +1,10 @@
+@startuml
+'https://plantuml.com/sequence-diagram
+
+autonumber
+
+Client -> Frontend: Get post by url
+Frontend -> Backend: GET: /post/{id}
+Frontend <-- Backend: post
+Client <-- Frontend: show created post page
+@enduml
