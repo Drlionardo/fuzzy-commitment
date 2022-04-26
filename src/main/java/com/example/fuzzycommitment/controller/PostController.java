@@ -2,16 +2,19 @@ package com.example.fuzzycommitment.controller;
 
 import com.example.fuzzycommitment.dto.request.CreatePostDto;
 import com.example.fuzzycommitment.entity.Post;
+import com.example.fuzzycommitment.entity.User;
 import com.example.fuzzycommitment.service.PostService;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
+import java.security.Principal;
 import java.util.List;
 import java.util.Map;
 
@@ -27,24 +30,25 @@ public class PostController {
     }
 
     @GetMapping("/post/{id}")
-    public ResponseEntity<Post> getPostById(@PathVariable String id) {
+    public ResponseEntity<Post> getPostById(Authentication authentication, @PathVariable String id) {
         var post = postService.getPost(id);
         return new ResponseEntity<>(post, HttpStatus.OK);
     }
     @GetMapping("/post")
-    public ResponseEntity<List<Post>> getLastPosts(@Valid @Min(1) @Max(1000) @RequestParam Integer limit,
+    public ResponseEntity<List<Post>> getLastPosts(@Valid @Min(1) @Max(100) @RequestParam Integer limit,
                                                       @RequestParam(required = false, name = "from") String cursorIterator) {
         var posts = postService.getPosts(cursorIterator, limit);
         return new ResponseEntity<>(posts, HttpStatus.OK);
     }
 
     @PutMapping("/post/{id}")
-    public ResponseEntity<Void> updatePost(String userId, @PathVariable String id) {
-        return new ResponseEntity<>(HttpStatus.CREATED);
+    public ResponseEntity<Post> updatePost(@PathVariable String id, @RequestBody CreatePostDto dto) {
+        var post = postService.updatePost(id, dto);
+        return new ResponseEntity<>(post, HttpStatus.CREATED);
     }
 
     @DeleteMapping("/post/{id}")
-    public ResponseEntity<Void> deletePost(String userId, @PathVariable String id) {
+    public ResponseEntity<Void> deletePost(@PathVariable String id) {
         postService.deletePost(id);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }

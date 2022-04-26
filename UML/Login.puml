@@ -1,0 +1,12 @@
+@startuml
+'https://plantuml.com/sequence-diagram
+
+autonumber
+
+Client -> Backend: Post: /login with username/password
+Backend -> Mailgun: Send OTP code to Email
+Client -> Backend: /login with username/otp
+Client <- Backend: set JWT in Authorization header
+Client -> Backend: access endpoints with JWT
+
+@enduml
