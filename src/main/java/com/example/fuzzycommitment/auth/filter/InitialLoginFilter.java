@@ -2,6 +2,8 @@ package com.example.fuzzycommitment.auth.filter;
 
 import com.example.fuzzycommitment.auth.authentication.OtpAuthentication;
 import com.example.fuzzycommitment.auth.authentication.UsernamePasswordAuthentication;
+import com.example.fuzzycommitment.entity.User;
+import com.example.fuzzycommitment.service.UserService;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 import lombok.AllArgsConstructor;
@@ -22,17 +24,19 @@ import java.nio.charset.StandardCharsets;
 import java.util.Map;
 
 @Component
-public class InitialFilter extends OncePerRequestFilter {
+public class InitialLoginFilter extends OncePerRequestFilter {
     private AuthenticationManager manager;
+    private UserService userService;
     @Value("${jwt.signing.key}")
     private String signingKey;
 
-    public InitialFilter(AuthenticationManager manager) {
+    public InitialLoginFilter(AuthenticationManager manager, UserService userService) {
         this.manager = manager;
+        this.userService = userService;
     }
 
     @Override
-    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
+    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) {
         String username = request.getHeader("username");
         String password = request.getHeader("password");
         String otp = request.getHeader("otp");
@@ -43,16 +47,17 @@ public class InitialFilter extends OncePerRequestFilter {
         } else {
             Authentication authentication = new OtpAuthentication(username, otp);
             manager.authenticate(authentication);
-
-            String jwt = buildJwt(username);
+            var user = (User) userService.loadUserByUsername(username);
+            String jwt = buildJwt(user);
             response.setHeader("Authorization", jwt);
         }
     }
 
-    private String buildJwt(String username) {
+    private String buildJwt(User user) {
         SecretKey key = Keys.hmacShaKeyFor(signingKey.getBytes(StandardCharsets.UTF_8));
         return Jwts.builder()
-                .setClaims(Map.of("username", username))
+                .setClaims(Map.of("username", user.getUsername(),
+                        "client_id", user.getId()))
                 .signWith(key)
                 .compact();
     }

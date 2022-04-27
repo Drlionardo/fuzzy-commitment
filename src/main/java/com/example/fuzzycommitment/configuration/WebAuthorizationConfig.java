@@ -1,10 +1,9 @@
 package com.example.fuzzycommitment.configuration;
 
-import com.example.fuzzycommitment.auth.filter.InitialFilter;
+import com.example.fuzzycommitment.auth.filter.InitialLoginFilter;
 import com.example.fuzzycommitment.auth.filter.JwtFilter;
 import com.example.fuzzycommitment.auth.provider.OtpAuthenticationProvider;
 import com.example.fuzzycommitment.auth.provider.UsernameAndPasswordAuthenticationProvider;
-import lombok.AllArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Lazy;
@@ -16,13 +15,13 @@ import org.springframework.security.web.authentication.www.BasicAuthenticationFi
 
 @Configuration
 public class WebAuthorizationConfig extends WebSecurityConfigurerAdapter {
-    private InitialFilter initialFilter;
+    private InitialLoginFilter initialLoginFilter;
     private JwtFilter jwtFilter;
     private UsernameAndPasswordAuthenticationProvider usernameAndPasswordAuthenticationProvider;
     private OtpAuthenticationProvider otpAuthenticationProvider;
 
-    public WebAuthorizationConfig(@Lazy InitialFilter initialFilter, JwtFilter jwtFilter, UsernameAndPasswordAuthenticationProvider usernameAndPasswordAuthenticationProvider, OtpAuthenticationProvider otpAuthenticationProvider) {
-        this.initialFilter = initialFilter;
+    public WebAuthorizationConfig(@Lazy InitialLoginFilter initialLoginFilter, JwtFilter jwtFilter, UsernameAndPasswordAuthenticationProvider usernameAndPasswordAuthenticationProvider, OtpAuthenticationProvider otpAuthenticationProvider) {
+        this.initialLoginFilter = initialLoginFilter;
         this.jwtFilter = jwtFilter;
         this.usernameAndPasswordAuthenticationProvider = usernameAndPasswordAuthenticationProvider;
         this.otpAuthenticationProvider = otpAuthenticationProvider;
@@ -37,7 +36,7 @@ public class WebAuthorizationConfig extends WebSecurityConfigurerAdapter {
     @Override
     protected void configure(HttpSecurity http) throws Exception {
         http.addFilterAt(
-                        initialFilter,
+                        initialLoginFilter,
                         BasicAuthenticationFilter.class)
                 .addFilterAfter(
                         jwtFilter,

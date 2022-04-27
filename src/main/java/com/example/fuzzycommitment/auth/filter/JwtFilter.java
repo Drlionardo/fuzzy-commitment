@@ -1,5 +1,6 @@
 package com.example.fuzzycommitment.auth.filter;
 
+import com.example.fuzzycommitment.auth.authentication.JwtAuthentication;
 import com.example.fuzzycommitment.auth.authentication.UsernamePasswordAuthentication;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
@@ -34,7 +35,9 @@ public class JwtFilter extends OncePerRequestFilter {
         String username = String.valueOf(claims.get("username"));
 
         GrantedAuthority authority = new SimpleGrantedAuthority("user");
-        var auth = new UsernamePasswordAuthentication(username, null, List.of(authority));
+        var auth = new JwtAuthentication(username, null, List.of(authority));
+        auth.setUserId(claims.get("client_id", String.class));
+
         SecurityContextHolder.getContext().setAuthentication(auth);
 
         filterChain.doFilter(request, response);

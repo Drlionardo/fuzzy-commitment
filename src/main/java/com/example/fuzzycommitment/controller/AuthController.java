@@ -1,7 +1,6 @@
 package com.example.fuzzycommitment.controller;
 
 import com.example.fuzzycommitment.dto.request.CreateUser;
-import com.example.fuzzycommitment.repository.UserRepo;
 import com.example.fuzzycommitment.service.UserService;
 import lombok.AllArgsConstructor;
 import org.springframework.web.bind.annotation.*;
