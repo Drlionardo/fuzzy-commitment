@@ -8,6 +8,7 @@ on:
 env:
   IMAGE_NAME: fuzzy-commitment
 
+
 permissions:
   contents: read
 
@@ -22,18 +23,23 @@ jobs:
       with:
         java-version: '17'
         distribution: 'adopt'
+
     - name: Login to Y.Cloud Container Registry
+      env: 
+          REGISTRY_TOKEN: ${{ secrets.REGISTRY_TOKEN }}
       run: docker login \
          --username oauth \
-         --password ${{ secrets.REGISTRY_TOKEN }} \
+         --password ${REGISTRY_TOKEN} \
          cr.yandex
     - name: Grant execute permission for gradlew
       run: chmod +x gradlew
     - name: Build a container image from our Spring Boot app using Paketo.io / Cloud Native Build Packs
       run: ./gradlew bootBuildImage --imageName=$IMAGE_NAME
     - name: Tag & publish to Container Registry
+      env: 
+        CONTAINER_REGISTRY_ID: ${{ secrets.CONTAINER_REGISTRY_ID }}
       run: |
-        IMAGE_ID=cr.yandex/${{ secret.CONTAINER_REGISTRY_ID }}/$IMAGE_NAME
+        IMAGE_ID=cr.yandex/${CONTAINER_REGISTRY_ID}/$IMAGE_NAME
         VERSION=latest
         docker tag $IMAGE_NAME $IMAGE_ID:$VERSION
         docker push $IMAGE_ID:$VERSION
