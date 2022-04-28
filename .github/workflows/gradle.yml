@@ -27,7 +27,7 @@ jobs:
     - name: Login to Y.Cloud Container Registry
       env: 
           REGISTRY_TOKEN: ${{ secrets.REGISTRY_TOKEN }}
-      run: echo "{REGISTRY_TOKEN}" | docker login cr.yandex -u oauth --password-stdin
+      run: echo "${REGISTRY_TOKEN}" | docker login cr.yandex -u oauth --password-stdin
     - name: Grant execute permission for gradlew
       run: chmod +x gradlew
     - name: Build a container image from our Spring Boot app using Paketo.io / Cloud Native Build Packs
