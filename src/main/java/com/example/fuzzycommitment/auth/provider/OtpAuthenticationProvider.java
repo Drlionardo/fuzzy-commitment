@@ -1,7 +1,7 @@
 package com.example.fuzzycommitment.auth.provider;
 
 import com.example.fuzzycommitment.auth.authentication.OtpAuthentication;
-import com.example.fuzzycommitment.service.AuthenticationServerProxy;
+import com.example.fuzzycommitment.service.AuthenticationService;
 import lombok.AllArgsConstructor;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -12,7 +12,7 @@ import org.springframework.stereotype.Component;
 @Component
 @AllArgsConstructor
 public class OtpAuthenticationProvider implements AuthenticationProvider {
-    private AuthenticationServerProxy proxy;
+    private AuthenticationService proxy;
 
     @Override
     public Authentication authenticate(Authentication authentication) throws AuthenticationException {

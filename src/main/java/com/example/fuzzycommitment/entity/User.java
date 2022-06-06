@@ -14,8 +14,8 @@ public class User implements UserDetails {
     @Id
     private String id;
     private String username;
-    private String password;
     private String email;
+    private String password;
     private boolean isEmailValidated;
 
     @Override

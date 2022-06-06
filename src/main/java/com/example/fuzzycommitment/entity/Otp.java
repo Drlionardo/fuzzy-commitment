@@ -12,4 +12,9 @@ public class Otp {
     private String userId;
     private String otp;
     private LocalDateTime creationDate;
+
+    public boolean isExpired() {
+        //todo: expire with timeout
+        return true;
+    }
 }

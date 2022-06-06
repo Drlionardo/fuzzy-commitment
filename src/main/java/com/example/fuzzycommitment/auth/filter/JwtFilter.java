@@ -1,7 +1,6 @@
 package com.example.fuzzycommitment.auth.filter;
 
 import com.example.fuzzycommitment.auth.authentication.JwtAuthentication;
-import com.example.fuzzycommitment.auth.authentication.UsernamePasswordAuthentication;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
@@ -45,6 +44,7 @@ public class JwtFilter extends OncePerRequestFilter {
 
     private String getJwtFromHeader(HttpServletRequest request) {
         var headerParts = request.getHeader("Authorization").split(" ");
+        //todo: validate if headerParts is not empty
         if(headerParts[0].equals("Bearer")) {
             return headerParts[1];
         } else {
@@ -63,6 +63,7 @@ public class JwtFilter extends OncePerRequestFilter {
 
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) {
-        return request.getServletPath().equals("/login") ||request.getServletPath().equals("/register");
+        var path = request.getServletPath();
+        return path.equals("/login") || path.equals("/register");
     }
 }

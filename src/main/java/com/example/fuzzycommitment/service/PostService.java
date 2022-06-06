@@ -46,7 +46,7 @@ public class PostService {
     }
 
     public List<Post> getPosts(String cursorIterator, Integer limit) {
-        //todo: implement cursor pagination
+        // todo: implement cursor pagination
 //        Query.query(Criteria.where("name").), User.class);
         return null;
     }

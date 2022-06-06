@@ -2,6 +2,8 @@ package com.example.fuzzycommitment.configuration;
 
 import com.example.fuzzycommitment.auth.filter.InitialLoginFilter;
 import com.example.fuzzycommitment.auth.filter.JwtFilter;
+import com.example.fuzzycommitment.auth.provider.EmailAndPasswordAuthenticationProvider;
+import com.example.fuzzycommitment.auth.provider.JwtAuthenticationProvider;
 import com.example.fuzzycommitment.auth.provider.OtpAuthenticationProvider;
 import com.example.fuzzycommitment.auth.provider.UsernameAndPasswordAuthenticationProvider;
 import org.springframework.context.annotation.Bean;
@@ -12,25 +14,31 @@ import org.springframework.security.config.annotation.authentication.builders.Au
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
-
 @Configuration
 public class WebAuthorizationConfig extends WebSecurityConfigurerAdapter {
     private InitialLoginFilter initialLoginFilter;
     private JwtFilter jwtFilter;
     private UsernameAndPasswordAuthenticationProvider usernameAndPasswordAuthenticationProvider;
     private OtpAuthenticationProvider otpAuthenticationProvider;
+    private EmailAndPasswordAuthenticationProvider emailAndPasswordAuthenticationProvider;
+    private JwtAuthenticationProvider jwtAuthenticationProvider;
 
-    public WebAuthorizationConfig(@Lazy InitialLoginFilter initialLoginFilter, JwtFilter jwtFilter, UsernameAndPasswordAuthenticationProvider usernameAndPasswordAuthenticationProvider, OtpAuthenticationProvider otpAuthenticationProvider) {
+    public WebAuthorizationConfig(@Lazy InitialLoginFilter initialLoginFilter, JwtFilter jwtFilter, UsernameAndPasswordAuthenticationProvider usernameAndPasswordAuthenticationProvider, OtpAuthenticationProvider otpAuthenticationProvider,
+                                  EmailAndPasswordAuthenticationProvider emailAndPasswordAuthenticationProvider,  JwtAuthenticationProvider jwtAuthenticationProvider) {
         this.initialLoginFilter = initialLoginFilter;
         this.jwtFilter = jwtFilter;
         this.usernameAndPasswordAuthenticationProvider = usernameAndPasswordAuthenticationProvider;
         this.otpAuthenticationProvider = otpAuthenticationProvider;
+        this.emailAndPasswordAuthenticationProvider = emailAndPasswordAuthenticationProvider;
+        this.jwtAuthenticationProvider = jwtAuthenticationProvider;
     }
 
     @Override
     protected void configure(AuthenticationManagerBuilder auth) {
         auth.authenticationProvider(otpAuthenticationProvider)
-                .authenticationProvider(usernameAndPasswordAuthenticationProvider);
+                .authenticationProvider(usernameAndPasswordAuthenticationProvider)
+                .authenticationProvider(emailAndPasswordAuthenticationProvider)
+                .authenticationProvider(jwtAuthenticationProvider);
     }
 
     @Override
