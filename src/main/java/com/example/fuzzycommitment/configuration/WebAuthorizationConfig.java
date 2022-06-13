@@ -5,29 +5,32 @@ import com.example.fuzzycommitment.auth.filter.JwtFilter;
 import com.example.fuzzycommitment.auth.provider.EmailAndPasswordAuthenticationProvider;
 import com.example.fuzzycommitment.auth.provider.JwtAuthenticationProvider;
 import com.example.fuzzycommitment.auth.provider.OtpAuthenticationProvider;
-import com.example.fuzzycommitment.auth.provider.UsernameAndPasswordAuthenticationProvider;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
+import org.springframework.web.cors.CorsConfiguration;
+
+import java.util.List;
+
 @Configuration
 public class WebAuthorizationConfig extends WebSecurityConfigurerAdapter {
     private InitialLoginFilter initialLoginFilter;
     private JwtFilter jwtFilter;
-    private UsernameAndPasswordAuthenticationProvider usernameAndPasswordAuthenticationProvider;
     private OtpAuthenticationProvider otpAuthenticationProvider;
     private EmailAndPasswordAuthenticationProvider emailAndPasswordAuthenticationProvider;
     private JwtAuthenticationProvider jwtAuthenticationProvider;
 
-    public WebAuthorizationConfig(@Lazy InitialLoginFilter initialLoginFilter, JwtFilter jwtFilter, UsernameAndPasswordAuthenticationProvider usernameAndPasswordAuthenticationProvider, OtpAuthenticationProvider otpAuthenticationProvider,
+    public WebAuthorizationConfig(@Lazy InitialLoginFilter initialLoginFilter, JwtFilter jwtFilter, OtpAuthenticationProvider otpAuthenticationProvider,
                                   EmailAndPasswordAuthenticationProvider emailAndPasswordAuthenticationProvider,  JwtAuthenticationProvider jwtAuthenticationProvider) {
         this.initialLoginFilter = initialLoginFilter;
         this.jwtFilter = jwtFilter;
-        this.usernameAndPasswordAuthenticationProvider = usernameAndPasswordAuthenticationProvider;
         this.otpAuthenticationProvider = otpAuthenticationProvider;
         this.emailAndPasswordAuthenticationProvider = emailAndPasswordAuthenticationProvider;
         this.jwtAuthenticationProvider = jwtAuthenticationProvider;
@@ -36,7 +39,6 @@ public class WebAuthorizationConfig extends WebSecurityConfigurerAdapter {
     @Override
     protected void configure(AuthenticationManagerBuilder auth) {
         auth.authenticationProvider(otpAuthenticationProvider)
-                .authenticationProvider(usernameAndPasswordAuthenticationProvider)
                 .authenticationProvider(emailAndPasswordAuthenticationProvider)
                 .authenticationProvider(jwtAuthenticationProvider);
     }
@@ -51,7 +53,15 @@ public class WebAuthorizationConfig extends WebSecurityConfigurerAdapter {
                         BasicAuthenticationFilter.class
                 );
 
-        http.authorizeRequests().mvcMatchers("/register**", "/post/**").permitAll()
+        CorsConfiguration corsConfiguration = new CorsConfiguration();
+        corsConfiguration.applyPermitDefaultValues();
+        corsConfiguration.setAllowedOrigins(List.of("*"));
+//        corsConfiguration.setAllowCredentials(true); //conflicts with *
+        corsConfiguration.setExposedHeaders(List.of("Authorization"));
+
+        http
+                .authorizeRequests().mvcMatchers("/register**", "/post/**").permitAll()
+                .and().cors().configurationSource(request -> corsConfiguration)
                 .and().csrf().disable()
                 .authorizeRequests()
                 .anyRequest().authenticated();

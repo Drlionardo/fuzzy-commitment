@@ -40,7 +40,6 @@ public class User implements UserDetails {
 
     @Override
     public boolean isEnabled() {
-//        return isEmailValidated;
-        return true;
+        return isEmailValidated;
     }
 }

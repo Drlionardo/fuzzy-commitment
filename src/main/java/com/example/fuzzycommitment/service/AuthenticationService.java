@@ -15,36 +15,34 @@ import java.time.LocalDateTime;
 @Service
 public class AuthenticationService {
     private BCryptPasswordEncoder passwordEncoder;
-    private UserRepo userRepo;
+    private UserService userService;
     private OtpGenerator otpGenerator;
     private OtpRepo otpRepo;
     private MailService mailService;
 
-    public boolean sendOtpByUsername(String username, String password) {
-        var user = userRepo.findByUsername(username)
-                .orElseThrow(() -> new UsernameNotFoundException(String.format("Username \"%s\" not found", username)));
-        if (passwordEncoder.matches(password, user.getPassword())) {
-            Otp otp = createOtp(user.getId());
-            return mailService.sendOtpToEmail(user.getEmail(), otp);
-        } else {
-            throw new BadCredentialsException("Bad credentials for username=" + username);
-        }
-    }
 
     public boolean sendOtpByEmail(String email, String password) {
-        var user = userRepo.findByEmail(email)
-                .orElseThrow(() -> new UsernameNotFoundException(String.format("Email \"%s\" not found", email)));
+        var user = userService.loadUserByEmail(email);
         if (passwordEncoder.matches(password, user.getPassword())) {
             Otp otp = createOtp(user.getId());
             return mailService.sendOtpToEmail(user.getEmail(), otp);
         } else {
-            throw new BadCredentialsException("Bad credentials for email" + email);
+            throw new BadCredentialsException(String.format("Bad credentials for email %s", email));
         }
     }
 
-    public boolean checkOtp(String username, String otp) {
-        var user = userRepo.findByUsername(username)
-                .orElseThrow(() -> new UsernameNotFoundException(String.format("Username \"%s\" not found", username)));
+    public boolean sendOtpToValidateEmail(String email, String password) {
+        var user = userService.loadUserByEmail(email);
+        if (passwordEncoder.matches(password, user.getPassword())) {
+            Otp otp = createOtp(user.getId());
+            return mailService.sendOtpToValidateEmailAfterRegistration(user.getEmail(), otp);
+        } else {
+            throw new BadCredentialsException(String.format("Bad credentials for email %s", email));
+        }
+    }
+
+    public boolean checkOtp(String email, String otp) {
+        var user = userService.loadUserByEmail(email);
         var otpFromDb = otpRepo.findByUserIdAndOtp(user.getId(), otp);
         if (otpFromDb.isPresent()) {
             otpRepo.delete(otpFromDb.get()); //todo: May cause error with retry -> invalidate by timeout

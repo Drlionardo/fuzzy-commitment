@@ -5,6 +5,8 @@ import com.example.fuzzycommitment.auth.authentication.OtpAuthentication;
 import com.example.fuzzycommitment.auth.authentication.UsernameAuthentication;
 import com.example.fuzzycommitment.dto.request.LoginUserDto;
 import com.example.fuzzycommitment.entity.User;
+import com.example.fuzzycommitment.service.AuthenticationService;
+import com.example.fuzzycommitment.service.JwtService;
 import com.example.fuzzycommitment.service.UserService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.jsonwebtoken.Jwts;
@@ -28,48 +30,45 @@ import java.util.Map;
 public class InitialLoginFilter extends OncePerRequestFilter {
     private AuthenticationManager manager;
     private UserService userService;
-    @Value("${jwt.signing.key}")
-    private String signingKey;
+    private JwtService jwtService;
 
-    public InitialLoginFilter(AuthenticationManager manager, UserService userService) {
+    public InitialLoginFilter(AuthenticationManager manager, UserService userService, JwtService jwtService) {
         this.manager = manager;
         this.userService = userService;
+        this.jwtService = jwtService;
     }
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws IOException {
         byte[] body = StreamUtils.copyToByteArray(request.getInputStream());
         LoginUserDto loginUserDto = new ObjectMapper().readValue(body, LoginUserDto.class);
-        String email = loginUserDto.getEmail();
-        String username = loginUserDto.getUsername();
+
+        String email = getEmail(loginUserDto);
         String password = loginUserDto.getPassword();
-        String otp = request.getHeader("otp");
+        String otp = loginUserDto.getOtp();
 
         if (otp == null) {
-            Authentication authentication;
-            if(email == null || email.isEmpty()) {
-                authentication = new UsernameAuthentication(username, password);
-            } else {
-                authentication = new EmailAuthentication(email, password);
-            }
+            var authentication = new EmailAuthentication(email, password);
             manager.authenticate(authentication);
         } else {
-            Authentication authentication = new OtpAuthentication(username, otp);
+            var  authentication = new OtpAuthentication(email, otp);
             manager.authenticate(authentication);
-            var user = (User) userService.loadUserByUsername(username);
-            String jwt = buildJwt(user);
+
+            var user = userService.loadUserByEmail(email);
+            String jwt = jwtService.buildJwt(user);
             response.setHeader("Authorization", jwt);
         }
     }
 
-    private String buildJwt(User user) {
-        SecretKey key = Keys.hmacShaKeyFor(signingKey.getBytes(StandardCharsets.UTF_8));
-        return Jwts.builder()
-                .setClaims(Map.of("username", user.getUsername(),
-                        "client_id", user.getId()))
-                .signWith(key)
-                .compact();
+    private String getEmail(LoginUserDto loginUserDto) {
+        String email = loginUserDto.getEmail();
+        if (email == null || email.isEmpty()) {
+            String username = loginUserDto.getUsername();
+            email = userService.getEmailByUsername(username);
+        }
+        return email;
     }
+
 
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) {

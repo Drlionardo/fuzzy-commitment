@@ -40,4 +40,23 @@ public class MailService {
         log.info("Mailgun service response {}", response.getBody());
         return response.getStatusCode().equals(HttpStatus.OK);
     }
+
+
+    public boolean sendOtpToValidateEmailAfterRegistration(String email, Otp otp) {
+        HttpHeaders headers = new HttpHeaders();
+        headers.setBasicAuth("api", mailgunKey);
+        headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
+
+        MultiValueMap<String, String> map= new LinkedMultiValueMap<>();
+        map.add("from", "Fuzzy commitment<no-reply@mail.tannuki.me>");
+        map.add("to", email);
+        map.add("subject", "Validate email to finish registration");
+        map.add("text", String.format("Thanks for registration, please use this code to finish registration \n %s",otp.getOtp()));
+
+        HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<>(map, headers);
+
+        var response = restTemplate.postForEntity(baseUrl, request , String.class);
+        log.info("Mailgun service response {}", response.getBody());
+        return response.getStatusCode().equals(HttpStatus.OK);
+    }
 }
